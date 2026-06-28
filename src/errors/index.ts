@@ -35,6 +35,18 @@ export class EnvFileNotFoundError extends DevEnvError {
   }
 }
 
+export class ConfigFileNotFoundError extends DevEnvError {
+  constructor(path: string) {
+    super(`Config file not found: ${path}`);
+  }
+}
+
+export class ConfigFileParseError extends DevEnvError {
+  constructor(path: string, detail: string) {
+    super(`Failed to parse config file at ${path}: ${detail}`);
+  }
+}
+
 export class ConfigNotFoundError extends DevEnvError {
   constructor(path: string) {
     super(`No .mcp-context.yml found at: ${path}`);

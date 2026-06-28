@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { McpContextConfig } from "../config/schema.js";
+import type { IConfigFileProvider } from "../providers/config-file.js";
 import type { IDockerProvider } from "../providers/docker.js";
 import type { IEnvProvider } from "../providers/env.js";
 import type { IGitProvider } from "../providers/git.js";
@@ -8,6 +9,8 @@ import type { IPortProvider } from "../providers/port.js";
 import type { IProcessProvider } from "../providers/process.js";
 import { checkServiceHealthHandler } from "../tools/check-service-health/handler.js";
 import { InputSchema as CheckServiceHealthSchema } from "../tools/check-service-health/schema.js";
+import { getConfigSummaryHandler } from "../tools/get-config-summary/handler.js";
+import { InputSchema as GetConfigSummarySchema } from "../tools/get-config-summary/schema.js";
 import { getDockerStateHandler } from "../tools/get-docker-state/handler.js";
 import { InputSchema as GetDockerStateSchema } from "../tools/get-docker-state/schema.js";
 import { getEnvSummaryHandler } from "../tools/get-env-summary/handler.js";
@@ -30,6 +33,7 @@ export interface Providers {
   env: IEnvProvider;
   log: ILogProvider;
   port: IPortProvider;
+  configFile: IConfigFileProvider;
 }
 
 export function registerTools(
@@ -103,6 +107,15 @@ export function registerTools(
     GetProjectStructureSchema.shape,
     async (input) => ({
       content: [{ type: "text", text: await getProjectStructureHandler(input) }],
+    }),
+  );
+
+  server.tool(
+    "get_config_summary",
+    "Read a config file and return all keys with secret values masked. Supports Spring Boot application.yml, application.properties, and .env files.",
+    GetConfigSummarySchema.shape,
+    async (input) => ({
+      content: [{ type: "text", text: await getConfigSummaryHandler(input, providers.configFile) }],
     }),
   );
 

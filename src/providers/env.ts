@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { EnvFileNotFoundError } from "../errors/index.js";
+import { isSecretKey } from "../utils/secret-patterns.js";
 
 export interface EnvEntry {
   key: string;
@@ -15,18 +16,6 @@ export interface EnvSummary {
 export interface IEnvProvider {
   parse(filePath: string, revealPatterns?: string[]): Promise<EnvSummary>;
 }
-
-const SECRET_KEY_PATTERNS = [
-  /secret/i,
-  /password/i,
-  /passwd/i,
-  /token/i,
-  /api[_-]?key/i,
-  /private[_-]?key/i,
-  /auth/i,
-  /credential/i,
-  /cert/i,
-];
 
 export class FsEnvProvider implements IEnvProvider {
   async parse(filePath: string, revealPatterns: string[] = []): Promise<EnvSummary> {
@@ -52,7 +41,7 @@ export class FsEnvProvider implements IEnvProvider {
         .trim()
         .replace(/^["']|["']$/g, "");
 
-      const isSecret = SECRET_KEY_PATTERNS.some((re) => re.test(key));
+      const isSecret = isSecretKey(key);
       const isRevealed = revealPatterns.some((pattern) => matchesGlob(key, pattern));
 
       entries.push({
