@@ -25,7 +25,7 @@ export async function createServer(rootPath = process.cwd()): Promise<McpServer>
   };
 
   const server = new McpServer({
-    name: "mcp-devenv",
+    name: "iwomm-mcp",
     version: "0.1.0",
   });
 

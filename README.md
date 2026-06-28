@@ -1,5 +1,7 @@
 # iwomm-mcp
 
+[![CI](https://github.com/dicoy/iwomm-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/dicoy/iwomm-mcp/actions/workflows/ci.yml)
+
 An [MCP](https://modelcontextprotocol.io) server that gives your AI assistant full awareness of your local dev environment — running processes, Docker containers, git state, open ports, log files, and more.
 
 Stop copy-pasting context. Let the AI ask for what it needs.
