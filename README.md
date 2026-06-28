@@ -1,4 +1,4 @@
-# mcp-devenv
+# iwomm-mcp
 
 An [MCP](https://modelcontextprotocol.io) server that gives your AI assistant full awareness of your local dev environment — running processes, Docker containers, git state, open ports, log files, and more.
 
@@ -56,6 +56,82 @@ Some things Claude can't read yet — paste these into chat when needed:
 
 ---
 
+## Installation
+
+### Via npm (recommended)
+
+```bash
+npm install -g iwomm-mcp
+```
+
+Or use it without installing — `npx` will fetch and run it on demand (see Claude config below).
+
+### From source
+
+```bash
+git clone https://github.com/dicoy/iwomm-mcp.git
+cd iwomm-mcp
+npm install
+npm run build
+```
+
+### Add to Claude Code
+
+```bash
+claude mcp add devenv -- npx -y iwomm-mcp
+```
+
+### Add to Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS:
+
+```json
+{
+  "mcpServers": {
+    "devenv": {
+      "command": "npx",
+      "args": ["-y", "iwomm-mcp"]
+    }
+  }
+}
+```
+
+Restart Claude. You should see `devenv` in `/mcp`.
+
+---
+
+## Optional: `.mcp-context.yml`
+
+Drop this file at the root of any project to tell `iwomm-mcp` about your services:
+
+```yaml
+# .mcp-context.yml
+services:
+  api:
+    port: 3000
+    logs: ./logs/api.log
+    health_endpoint: /health
+  worker:
+    logs: ./logs/worker.log
+  postgres:
+    port: 5432
+
+env_files:
+  - .env
+  - .env.local
+
+# Keys matching these patterns will have their values revealed
+# (even if they look like secrets). Supports exact match and * prefix glob.
+reveal_env_patterns:
+  - NODE_ENV
+  - APP_*
+  - FEATURE_*
+```
+
+Without this file, `get_recent_logs` works only with explicit file paths. All other tools work without any config.
+
+---
+
 ## Architecture
 
 ```
@@ -64,7 +140,7 @@ Some things Claude can't read yet — paste these into chat when needed:
 └───────────────────────┬─────────────────────────────────┘
                         │ MCP protocol (stdio)
 ┌───────────────────────▼─────────────────────────────────┐
-│                    mcp-devenv                            │
+│                    iwomm-mcp                             │
 │                                                          │
 │  ┌──────────────────┐     ┌──────────────────────────┐  │
 │  │   Tool Registry  │     │       Providers          │  │
@@ -92,70 +168,6 @@ Some things Claude can't read yet — paste these into chat when needed:
 - **One Zod schema per tool** — the same schema drives both MCP input validation and TypeScript types. No duplication.
 - **Typed error hierarchy** — `DockerNotAvailableError`, `GitNotARepositoryError`, etc. Callers can catch exactly what they expect.
 - **Composition root** — `createServer()` in `server.ts` is the only place that wires interfaces to implementations. Everything else is pure.
-
----
-
-## Quick start
-
-```bash
-git clone https://github.com/your-handle/mcp-devenv
-cd mcp-devenv
-npm install
-npm run build
-```
-
-### Add to Claude Code
-
-```bash
-claude mcp add devenv -- node /absolute/path/to/mcp-devenv/dist/index.js
-```
-
-Or add manually to `~/.claude/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "devenv": {
-      "command": "node",
-      "args": ["/absolute/path/to/mcp-devenv/dist/index.js"]
-    }
-  }
-}
-```
-
-Restart Claude Code. You should see `devenv` in `/mcp`.
-
----
-
-## Optional: `.mcp-context.yml`
-
-Drop this file at the root of any project to tell `mcp-devenv` about your services:
-
-```yaml
-# .mcp-context.yml
-services:
-  api:
-    port: 3000
-    logs: ./logs/api.log
-    health_endpoint: /health
-  worker:
-    logs: ./logs/worker.log
-  postgres:
-    port: 5432
-
-env_files:
-  - .env
-  - .env.local
-
-# Keys matching these patterns will have their values revealed
-# (even if they look like secrets). Supports exact match and * prefix glob.
-reveal_env_patterns:
-  - NODE_ENV
-  - APP_*
-  - FEATURE_*
-```
-
-Without this file, `get_recent_logs` works only with explicit file paths. All other tools work without any config.
 
 ---
 
@@ -222,4 +234,3 @@ src/
 | Build | `tsup` |
 | Tests | `vitest` |
 | Lint + format | `biome` |
-| CI | GitHub Actions |

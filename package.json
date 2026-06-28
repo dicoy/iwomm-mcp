@@ -1,15 +1,30 @@
 {
-  "name": "mcp-devenv",
+  "name": "iwomm-mcp",
   "version": "0.1.0",
   "description": "MCP server that exposes your local dev environment to AI assistants",
   "type": "module",
   "license": "MIT",
+  "author": "dicoy",
+  "homepage": "https://github.com/dicoy/iwomm-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dicoy/iwomm-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "devenv",
+    "development",
+    "docker",
+    "claude",
+    "ai"
+  ],
   "engines": {
     "node": ">=20.0.0"
   },
   "main": "dist/index.js",
   "bin": {
-    "mcp-devenv": "dist/index.js"
+    "iwomm-mcp": "dist/index.js"
   },
   "files": [
     "dist"
