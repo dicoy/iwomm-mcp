@@ -16,10 +16,43 @@ Stop copy-pasting context. Let the AI ask for what it needs.
 | `get_docker_state` | Which containers are up? Are they healthy? What are their ports? |
 | `get_git_status` | What branch am I on? What's dirty? Am I ahead/behind? |
 | `get_env_summary` | What keys does my `.env` have? (Values masked by default) |
+| `get_config_summary` | What's in my `application.yml`? (`.yml`, `.properties`, `.env`) |
+| `get_dependencies` | What libraries am I using? (`pom.xml`, `build.gradle`, `go.mod`, `package.json`) |
 | `get_open_ports` | What's listening on this machine right now? |
 | `get_recent_logs` | What did my API service log in the last 50 lines? |
 | `get_project_structure` | What does this codebase look like? (gitignore-aware) |
 | `check_service_health` | Is `http://localhost:3000/health` responding? How fast? |
+
+---
+
+## Language support
+
+Most tools operate at the OS or network level and work regardless of stack. The table below calls out the gaps.
+
+| Tool | Node / TS | Java (Spring) | Go | Python | Ruby / .NET / Rust |
+|---|---|---|---|---|---|
+| `get_project_structure` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `get_git_status` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `get_docker_state` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `get_open_ports` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `check_service_health` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `get_recent_logs` | ✅ | ✅ | ✅ | ✅ | ✅ |
+| `get_running_processes` | ✅ | ⚠️ all JVM processes share the name `java` — use `filter_name=java` + `filter_args=myapp.jar` | ✅ | ✅ | ✅ |
+| `get_env_summary` | ✅ | ⚠️ `.env` files only — use `get_config_summary` for `application.*` | ✅ | ✅ | ✅ |
+| `get_config_summary` | ✅ | ✅ `.yml` · `.properties` | ❌ | ❌ | ❌ |
+| `get_dependencies` | ✅ `package.json` | ✅ `pom.xml` · `build.gradle[.kts]` | ✅ `go.mod` | ❌ | ❌ |
+
+### What still needs copy-paste
+
+Some things Claude can't read yet — paste these into chat when needed:
+
+- **Python deps**: `requirements.txt`, `pyproject.toml`, `setup.py`
+- **Rust deps**: `Cargo.toml`
+- **Ruby deps**: `Gemfile`
+- **.NET deps**: `*.csproj`
+- **Python/Rust config**: `config.toml`, `settings.py` and similar formats
+- **Java stack traces in logs**: `get_recent_logs` returns raw lines — a trace split across the tail boundary may arrive incomplete
+- **Spring OAuth2 properties**: keys containing `auth` (e.g. `authorization-grant-type`) are masked by the secret-detection heuristic; paste the value if needed
 
 ---
 

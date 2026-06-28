@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { tryLoadConfig } from "./config/loader.js";
 import { FsConfigFileProvider } from "./providers/config-file.js";
+import { FsDependenciesProvider } from "./providers/dependencies.js";
 import { DockerodeProvider } from "./providers/docker.js";
 import { FsEnvProvider } from "./providers/env.js";
 import { SimpleGitProvider } from "./providers/git.js";
@@ -20,6 +21,7 @@ export async function createServer(rootPath = process.cwd()): Promise<McpServer>
     log: new FsLogProvider(),
     port: new LsofPortProvider(),
     configFile: new FsConfigFileProvider(),
+    dependencies: new FsDependenciesProvider(),
   };
 
   const server = new McpServer({

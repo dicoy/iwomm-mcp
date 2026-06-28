@@ -1,6 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { McpContextConfig } from "../config/schema.js";
 import type { IConfigFileProvider } from "../providers/config-file.js";
+import type { IDependenciesProvider } from "../providers/dependencies.js";
 import type { IDockerProvider } from "../providers/docker.js";
 import type { IEnvProvider } from "../providers/env.js";
 import type { IGitProvider } from "../providers/git.js";
@@ -11,6 +12,8 @@ import { checkServiceHealthHandler } from "../tools/check-service-health/handler
 import { InputSchema as CheckServiceHealthSchema } from "../tools/check-service-health/schema.js";
 import { getConfigSummaryHandler } from "../tools/get-config-summary/handler.js";
 import { InputSchema as GetConfigSummarySchema } from "../tools/get-config-summary/schema.js";
+import { getDependenciesHandler } from "../tools/get-dependencies/handler.js";
+import { InputSchema as GetDependenciesSchema } from "../tools/get-dependencies/schema.js";
 import { getDockerStateHandler } from "../tools/get-docker-state/handler.js";
 import { InputSchema as GetDockerStateSchema } from "../tools/get-docker-state/schema.js";
 import { getEnvSummaryHandler } from "../tools/get-env-summary/handler.js";
@@ -34,6 +37,7 @@ export interface Providers {
   log: ILogProvider;
   port: IPortProvider;
   configFile: IConfigFileProvider;
+  dependencies: IDependenciesProvider;
 }
 
 export function registerTools(
@@ -116,6 +120,17 @@ export function registerTools(
     GetConfigSummarySchema.shape,
     async (input) => ({
       content: [{ type: "text", text: await getConfigSummaryHandler(input, providers.configFile) }],
+    }),
+  );
+
+  server.tool(
+    "get_dependencies",
+    "List dependencies from a build file: pom.xml (Maven), build.gradle / build.gradle.kts (Gradle), go.mod (Go), package.json (npm). Results grouped by scope.",
+    GetDependenciesSchema.shape,
+    async (input) => ({
+      content: [
+        { type: "text", text: await getDependenciesHandler(input, providers.dependencies) },
+      ],
     }),
   );
 

@@ -59,6 +59,18 @@ export class ConfigParseError extends DevEnvError {
   }
 }
 
+export class DependencyFileNotFoundError extends DevEnvError {
+  constructor(path: string) {
+    super(`Dependency file not found: ${path}`);
+  }
+}
+
+export class DependencyParseError extends DevEnvError {
+  constructor(path: string, detail: string) {
+    super(`Failed to parse dependency file at ${path}: ${detail}`);
+  }
+}
+
 export class ProcessProviderError extends DevEnvError {}
 
 export class PortProviderError extends DevEnvError {}
