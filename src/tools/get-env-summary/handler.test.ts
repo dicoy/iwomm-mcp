@@ -39,7 +39,10 @@ describe("getEnvSummaryHandler", () => {
       entries: [{ key: "API_TOKEN", value: "tok_live_abc123", isSecret: true }],
     });
 
-    const result = await getEnvSummaryHandler({ path: ".env", reveal_patterns: ["API_TOKEN"] }, provider);
+    const result = await getEnvSummaryHandler(
+      { path: ".env", reveal_patterns: ["API_TOKEN"] },
+      provider,
+    );
 
     expect(result).toContain("tok_live_abc123");
   });
