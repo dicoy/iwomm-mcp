@@ -4,6 +4,8 @@ An [MCP](https://modelcontextprotocol.io) server that gives your AI assistant fu
 
 Stop copy-pasting context. Let the AI ask for what it needs.
 
+![demo](demo/demo.gif)
+
 ---
 
 ## Tools
