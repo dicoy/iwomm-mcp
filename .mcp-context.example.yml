@@ -1,0 +1,36 @@
+# .mcp-context.yml
+# Drop this file at the root of any project to tell mcp-devenv about your services.
+# Rename to .mcp-context.yml (remove the .example suffix) to activate it.
+
+services:
+  # Each key is a service name used by get_recent_logs { service: "api" }
+  # and check_service_health when no URL is passed.
+  api:
+    port: 3000
+    logs: ./logs/api.log          # relative to this file's directory
+    health_endpoint: /health
+
+  worker:
+    logs: ./logs/worker.log       # no port — background process
+
+  postgres:
+    port: 5432                    # no logs — use get_open_ports instead
+
+  redis:
+    port: 6379
+
+# Which .env files to read with get_env_summary.
+# Listed in priority order (later files override earlier ones, like dotenv).
+env_files:
+  - .env
+  - .env.local
+
+# Keys matching these patterns will have their values shown even if they
+# look like secrets (e.g. contain "token", "key", "password").
+# Supports exact match (NODE_ENV) and trailing-wildcard glob (APP_*).
+reveal_env_patterns:
+  - NODE_ENV
+  - APP_*
+  - FEATURE_*
+  - LOG_LEVEL
+  - PORT
