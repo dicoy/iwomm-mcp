@@ -12,7 +12,6 @@ export interface ProcessInfo {
 export interface IProcessProvider {
   list(): Promise<ProcessInfo[]>;
   findByPort(port: number): Promise<ProcessInfo[]>;
-  findByName(name: string): Promise<ProcessInfo[]>;
 }
 
 export class NodeProcessProvider implements IProcessProvider {
@@ -29,14 +28,6 @@ export class NodeProcessProvider implements IProcessProvider {
     const [all, portPidMap] = await Promise.all([this.list(), getPortToPidMap()]);
     const pids = portPidMap.get(port) ?? [];
     return all.filter((p) => pids.includes(p.pid));
-  }
-
-  async findByName(name: string): Promise<ProcessInfo[]> {
-    const all = await this.list();
-    const lower = name.toLowerCase();
-    return all.filter(
-      (p) => p.name.toLowerCase().includes(lower) || p.command.toLowerCase().includes(lower),
-    );
   }
 }
 

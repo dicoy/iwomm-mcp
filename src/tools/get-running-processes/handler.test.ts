@@ -14,7 +14,6 @@ const makeProcess = (overrides: Partial<ProcessInfo> = {}): ProcessInfo => ({
 const makeProvider = (overrides: Partial<IProcessProvider> = {}): IProcessProvider => ({
   list: vi.fn(),
   findByPort: vi.fn(),
-  findByName: vi.fn(),
   ...overrides,
 });
 
@@ -47,15 +46,58 @@ describe("getRunningProcessesHandler", () => {
     expect(result).toContain("9000");
   });
 
-  it("filters by name when filter_name is given", async () => {
+  it("filters by name against the full process list", async () => {
     const provider = makeProvider({
-      findByName: vi.fn().mockResolvedValue([makeProcess({ name: "postgres" })]),
+      list: vi
+        .fn()
+        .mockResolvedValue([
+          makeProcess({ name: "java", command: "java -jar myapp.jar" }),
+          makeProcess({ pid: 5678, name: "java", command: "java -jar other.jar" }),
+        ]),
     });
 
-    const result = await getRunningProcessesHandler({ filter_name: "postgres" }, provider);
+    const result = await getRunningProcessesHandler({ filter_name: "myapp" }, provider);
 
-    expect(provider.findByName).toHaveBeenCalledWith("postgres");
-    expect(result).toContain("postgres");
+    expect(provider.list).toHaveBeenCalledOnce();
+    expect(result).toContain("myapp");
+    expect(result).not.toContain("other");
+  });
+
+  it("filters by args when filter_args is given", async () => {
+    const provider = makeProvider({
+      list: vi
+        .fn()
+        .mockResolvedValue([
+          makeProcess({ name: "java", command: "java -jar myapp.jar" }),
+          makeProcess({ pid: 5678, name: "java", command: "java -jar other.jar" }),
+        ]),
+    });
+
+    const result = await getRunningProcessesHandler({ filter_args: "myapp.jar" }, provider);
+
+    expect(result).toContain("myapp");
+    expect(result).not.toContain("other");
+  });
+
+  it("ANDs filter_name and filter_args together", async () => {
+    const provider = makeProvider({
+      list: vi
+        .fn()
+        .mockResolvedValue([
+          makeProcess({ name: "java", command: "java -jar myapp.jar" }),
+          makeProcess({ pid: 5678, name: "python", command: "python myapp.py" }),
+          makeProcess({ pid: 9999, name: "java", command: "java -jar other.jar" }),
+        ]),
+    });
+
+    const result = await getRunningProcessesHandler(
+      { filter_name: "java", filter_args: "myapp.jar" },
+      provider,
+    );
+
+    expect(result).toContain("1234");
+    expect(result).not.toContain("5678");
+    expect(result).not.toContain("9999");
   });
 
   it("returns a human-readable message when no processes match", async () => {
@@ -67,6 +109,20 @@ describe("getRunningProcessesHandler", () => {
 
     expect(result).toContain("9999");
     expect(result).toContain("No processes found");
+  });
+
+  it("includes both filter criteria in the empty-result message", async () => {
+    const provider = makeProvider({
+      list: vi.fn().mockResolvedValue([]),
+    });
+
+    const result = await getRunningProcessesHandler(
+      { filter_name: "java", filter_args: "myapp.jar" },
+      provider,
+    );
+
+    expect(result).toContain(`name "java"`);
+    expect(result).toContain(`args "myapp.jar"`);
   });
 
   it("truncates very long commands", async () => {

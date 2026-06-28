@@ -5,14 +5,21 @@ export async function getRunningProcessesHandler(
   input: Input,
   processProvider: IProcessProvider,
 ): Promise<string> {
-  let processes: ProcessInfo[];
+  let processes =
+    input.filter_port !== undefined
+      ? await processProvider.findByPort(input.filter_port)
+      : await processProvider.list();
 
-  if (input.filter_port !== undefined) {
-    processes = await processProvider.findByPort(input.filter_port);
-  } else if (input.filter_name !== undefined) {
-    processes = await processProvider.findByName(input.filter_name);
-  } else {
-    processes = await processProvider.list();
+  if (input.filter_name !== undefined) {
+    const lower = input.filter_name.toLowerCase();
+    processes = processes.filter(
+      (p) => p.name.toLowerCase().includes(lower) || p.command.toLowerCase().includes(lower),
+    );
+  }
+
+  if (input.filter_args !== undefined) {
+    const lower = input.filter_args.toLowerCase();
+    processes = processes.filter((p) => p.command.toLowerCase().includes(lower));
   }
 
   if (processes.length === 0) {
@@ -32,7 +39,10 @@ export async function getRunningProcessesHandler(
 
 function formatEmptyResult(input: Input): string {
   if (input.filter_port !== undefined) return `No processes found on port ${input.filter_port}.`;
-  if (input.filter_name !== undefined) return `No processes found matching "${input.filter_name}".`;
+  const parts: string[] = [];
+  if (input.filter_name !== undefined) parts.push(`name "${input.filter_name}"`);
+  if (input.filter_args !== undefined) parts.push(`args "${input.filter_args}"`);
+  if (parts.length > 0) return `No processes found matching ${parts.join(" and ")}.`;
   return "No processes found.";
 }
 
