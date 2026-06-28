@@ -80,9 +80,9 @@ await section('get_running_processes  ·  filter_name: "mcp"', () =>
 );
 
 // ── env masking: secrets hidden, safe vars shown ──────────────────────────────
-await section('get_env_summary  ·  path: "demo/.env.demo"', () =>
+await section('get_env_summary  ·  path: "demo/env.example"', () =>
   getEnvSummaryHandler({
-    path: "demo/.env.demo",
+    path: "demo/env.example",
     reveal_patterns: ["NODE_ENV", "PORT", "LOG_LEVEL", "APP_*"],
   }, env),
 );
