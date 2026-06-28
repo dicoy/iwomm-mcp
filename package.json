@@ -25,6 +25,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "demo": "tsx demo/index.ts",
     "ci": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
@@ -43,6 +44,7 @@
     "@types/node": "^20.17.6",
     "@vitest/coverage-v8": "^2.1.8",
     "tsup": "^8.3.5",
+    "tsx": "^4.22.4",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }
